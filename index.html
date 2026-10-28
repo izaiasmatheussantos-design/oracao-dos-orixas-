@@ -131,7 +131,7 @@ fbq('init', '1149957704651076');fbq('track', 'PageView');
   <footer class="footer"><div class="container"><p>Conteúdo de cunho religioso e devocional, voltado às religiões de matriz africana. Este conteúdo não substitui acompanhamento médico, psicológico, financeiro ou jurídico.</p><p>Este site não faz parte do Facebook ou da Meta Platforms, Inc.</p><p>© 2026 Oração do Seu Orixá. Todos os direitos reservados.</p></div></footer>
   <div class="modal" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden><div class="modal-card"><h3 id="modalTitle">Não foi possível abrir o pagamento</h3><p>Não foi possível abrir o checkout neste momento. Tente novamente em instantes.</p><button type="button" class="close" id="closeModal">Entendi</button></div></div>
   <script>
-    // CONFIGURAÇÃO: substitua o texto vazio pela URL HTTPS do seu checkout (Cakto, etc.).
+    // Checkout oficial do produto.
     const CHECKOUT_URL = 'https://pay.cakto.com.br/rhsdq2m_1251719';
     const rail = document.getElementById('testimonialRail');
     const slides = Array.from(rail.querySelectorAll('.slide'));
@@ -146,7 +146,18 @@ fbq('init', '1149957704651076');fbq('track', 'PageView');
     window.addEventListener('resize',updateDots);
     const modal=document.getElementById('checkoutModal');
     document.querySelectorAll('[data-checkout]').forEach(btn=>btn.addEventListener('click',()=>{
-      if(/^https:\/\//i.test(CHECKOUT_URL)){window.location.assign(CHECKOUT_URL);}else{modal.hidden=false;document.getElementById('closeModal').focus();}
+      if(/^https:\/\//i.test(CHECKOUT_URL)){
+        const destination = new URL(CHECKOUT_URL);
+        const incoming = new URLSearchParams(window.location.search);
+        ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','utm_id','src','sck','fbclid','gclid','ttclid'].forEach(key=>{
+          const value = incoming.get(key);
+          if(value) destination.searchParams.set(key,value);
+        });
+        if(typeof window.fbq==='function'){
+          window.fbq('track','InitiateCheckout',{value:37.90,currency:'BRL',content_ids:['oracao-do-seu-orixa'],content_type:'product',num_items:1});
+        }
+        window.location.assign(destination.toString());
+      }else{modal.hidden=false;document.getElementById('closeModal').focus();}
     }));
     document.getElementById('closeModal').addEventListener('click',()=>modal.hidden=true);
     modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true;});
